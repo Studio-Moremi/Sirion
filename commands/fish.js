@@ -9,8 +9,8 @@ const fishList = require('../utils/fishlist');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('fish')
-        .setDescription('Catch a fish!'),
+        .setName('낚시')
+        .setDescription('낚시로 물고기를 얻어요!'),
     async execute(interaction) {
         const gradeProbabilities = {
             1: 0.01,
