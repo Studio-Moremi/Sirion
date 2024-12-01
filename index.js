@@ -1,20 +1,55 @@
-const { Client, Events, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
 
 const prefix = 'ㅅ';
 client.commands = new Map();
 
 const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
+
+const commands = [];
 for (const file of commandFiles) {
     const command = require(path.join(__dirname, 'commands', file));
     client.commands.set(command.data.name, command);
+    commands.push(command.data.toJSON());
 }
 
-client.once('ready', () => {
-    console.log('Bot is online!');
+(async () => {
+    try {
+        const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+        await rest.put(
+            Routes.applicationCommands(process.env.CLIENT_ID), // CLIENT_ID는 .env에 추가
+            { body: commands }
+        );
+        console.log(`[시스템] 커맨드 ${commands.length}개 로딩 완료.`);
+        console.log(`[시스템] 커맨드 ${commands.length}개 추가 완료.`);
+    } catch (error) {
+        console.error('Error registering slash commands:', error);
+    }
+})();
+
+client.once('ready', async () => {
+    const guilds = await client.guilds.fetch(); // 봇이 속한 서버 목록 가져오기
+    const users = new Set(); // 유저 ID를 중복 없이 저장할 집합
+
+    for (const guild of guilds.values()) {
+        const members = await guild.members.fetch();
+        members.each(member => {
+            if (!member.user.bot) users.add(member.user.id); // 봇이 아닌 유저만 추가
+        });
+    }
+
+    console.log(`[시스템] 봇 온라인.`);
+    console.log(`[시스템] 현재 ${guilds.size}개의 서버가 봇 추가.`);
+    console.log(`[시스템] 현재 ${users.size}명이 시리온을 이용.`);
 });
 
 function logError(error) {
