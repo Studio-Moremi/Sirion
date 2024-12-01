@@ -37,13 +37,13 @@ for (const file of commandFiles) {
 })();
 
 client.once('ready', async () => {
-    const guilds = await client.guilds.fetch(); // 봇이 속한 서버 목록 가져오기
-    const users = new Set(); // 유저 ID를 중복 없이 저장할 집합
+    const guilds = await client.guilds.fetch();
+    const users = new Set();
 
     for (const guild of guilds.values()) {
         const members = await guild.members.fetch();
         members.each(member => {
-            if (!member.user.bot) users.add(member.user.id); // 봇이 아닌 유저만 추가
+            if (!member.user.bot) users.add(member.user.id);
         });
     }
 

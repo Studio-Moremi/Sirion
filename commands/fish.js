@@ -5,12 +5,13 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
 const db = require('../utils/db');
+const LANG = require('../language.json');
 const fishList = require('../utils/fishlist');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('낚시')
-        .setDescription('낚시로 물고기를 얻어요!'),
+        .setDescription(LANG.fish),
     async execute(interaction) {
         const gradeProbabilities = {
             1: 0.01,
@@ -41,7 +42,7 @@ module.exports = {
 
         const embed = new MessageEmbed()
             .setColor('#FFFFFF')
-            .setTitle('물고기를 잡았어요! 🐟')
+            .setTitle(LANG.catchfish)
             .setDescription(`${interaction.user.username}님이 **${name}**을 잡았어요!`)
             .addFields(
                 { name: '등급', value: `${grade}등급`, inline: true },
