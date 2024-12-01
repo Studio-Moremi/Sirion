@@ -2,7 +2,7 @@ const { Client, Intents } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const prefix = 'ㅅ';
 client.commands = new Map();
