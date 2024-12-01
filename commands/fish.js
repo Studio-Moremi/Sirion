@@ -3,7 +3,7 @@
  - op@kkutu.store
 */
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const db = require('../utils/db');
 const LANG = require('../language.json');
 const fishList = require('../utils/fishlist');
@@ -40,7 +40,7 @@ module.exports = {
             [value, userId]
         );
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setColor('#FFFFFF')
             .setTitle(LANG.catchfish)
             .setDescription(`${interaction.user.username}님이 **${name}**을 잡았어요!`)

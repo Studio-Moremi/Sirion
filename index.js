@@ -37,24 +37,41 @@ for (const file of commandFiles) {
 })();
 
 client.once('ready', async () => {
-    const guilds = await client.guilds.fetch();
-    const users = new Set();
+    try {
+        if (!client.guilds) {
+            throw new Error('client.guilds is undefined');
+        }
 
-    for (const guild of guilds.values()) {
-        const members = await guild.members.fetch();
-        members.each(member => {
-            if (!member.user.bot) users.add(member.user.id);
-        });
+        const guilds = await client.guilds.fetch();
+        console.log(`Fetched guilds: ${guilds.size}개`);
+        const users = new Set();
+
+        for (const guild of guilds.values()) {
+            console.log(`Fetching members for guild: ${guild.name}`);
+            try {
+                const members = await guild.members.fetch();
+                members.each(member => {
+                    if (!member.user.bot) users.add(member.user.id);
+                });
+            } catch (guildError) {
+                console.error(`서버 ${guild.name}의 멤버 정보를 가져오는 데 실패했습니다:`, guildError);
+                logError(guildError, 'SIRION_GUILD_ERROR.log');
+            }
+        }
+
+        console.log(`[시스템] 봇 온라인.`);
+        console.log(`[시스템] 현재 ${guilds.size}개의 서버가 봇 추가.`);
+        console.log(`[시스템] 현재 ${users.size}명이 시리온을 이용.`);
+    } catch (error) {
+        console.error('서버 및 사용자 정보 조회 오류:', error);
+        logError(error, 'SIRION_ERROR.log');
     }
-
-    console.log(`[시스템] 봇 온라인.`);
-    console.log(`[시스템] 현재 ${guilds.size}개의 서버가 봇 추가.`);
-    console.log(`[시스템] 현재 ${users.size}명이 시리온을 이용.`);
 });
 
-function logError(error) {
+
+function logError(error, logFileName = 'SIRION_ERROR.log') {
     const logDir = path.join(__dirname, 'log');
-    const logFile = path.join(logDir, 'SIRION_ERROR.log');
+    const logFile = path.join(logDir, logFileName);
 
     if (!fs.existsSync(logDir)) {
         fs.mkdirSync(logDir);

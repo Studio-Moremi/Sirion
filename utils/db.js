@@ -22,6 +22,25 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
     }
 });
 
+function getUserInfo(userId) {
+    return new Promise((resolve, reject) => {
+        dbEvents.once('connected', () => {
+            const query = `SELECT * FROM users WHERE user_id = ?`;
+            db.get(query, [userId], (err, row) => {
+                if (err) {
+                    logger.error(`❗ 사용자 정보 조회 실패 (userId: ${userId}): ${err.message}`);
+                    dbEvents.emit('error', err);
+                    reject(err);
+                } else {
+                    logger.info(`✅ 사용자 정보 조회 성공 (userId: ${userId})`);
+                    dbEvents.emit('userInfoRetrieved', row);
+                    resolve(row || null);
+                }
+            });
+        });
+    });
+}
+
 const logger = winston.createLogger({
     level: 'info',
     format: format.combine(

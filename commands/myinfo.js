@@ -3,7 +3,7 @@
  - op@kkutu.store
 */
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const db = require('../utils/db');
 const { getLevelInfo } = require('../utils/level');
 const LANG = require('../language.json');
@@ -27,7 +27,7 @@ module.exports = {
             const { level, currentExp, nextLevelExp } = getLevelInfo(userInfo.experience);
             const coins = userInfo.coins;
 
-            const embed = new MessageEmbed()
+            const embed = new EmbedBuilder()
                 .setColor('#00BFFF')
                 .setTitle(`${username}의 정보`)
                 .setThumbnail(avatarUrl)
