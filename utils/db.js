@@ -12,34 +12,29 @@ class DatabaseEventEmitter extends EventEmitter {}
 const dbEvents = new DatabaseEventEmitter();
 
 const dbPath = path.join(__dirname, '../database.db');
-const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, err => {
+const db = new sqlite3.Database('./database.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
-        logger.error('❗ 데이터베이스 연결 오류:', err.message);
-        dbEvents.emit('error', err);
+        console.error('❌ Failed to connect to the database:', err.message);
     } else {
-        logger.info('✅ 데이터베이스 연결 성공');
-        dbEvents.emit('connected');
+        console.log('✅ Connected to the SQLite database.');
     }
 });
 
 function getUserInfo(userId) {
     return new Promise((resolve, reject) => {
-        dbEvents.once('connected', () => {
-            const query = `SELECT * FROM users WHERE user_id = ?`;
-            db.get(query, [userId], (err, row) => {
-                if (err) {
-                    logger.error(`❗ 사용자 정보 조회 실패 (userId: ${userId}): ${err.message}`);
-                    dbEvents.emit('error', err);
-                    reject(err);
-                } else {
-                    logger.info(`✅ 사용자 정보 조회 성공 (userId: ${userId})`);
-                    dbEvents.emit('userInfoRetrieved', row);
-                    resolve(row || null);
-                }
-            });
+        const query = `SELECT * FROM users WHERE user_id = ?`;
+        db.get(query, [userId], (err, row) => {
+            if (err) {
+                logger.error(`❗ 사용자 정보 조회 실패 (userId: ${userId}): ${err.message}`);
+                reject(err);
+            } else {
+                logger.info(`✅ 사용자 정보 조회 성공 (userId: ${userId})`);
+                resolve(row || null);
+            }
         });
     });
 }
+
 
 const logger = winston.createLogger({
     level: 'info',
@@ -120,23 +115,6 @@ function initializeUser(userId) {
                 logger.info(`✅ 사용자 초기화 성공 (userId: ${userId})`);
                 dbEvents.emit('userInitialized', userId);
                 resolve();
-            }
-        });
-    });
-}
-
-function getUserInfo(userId) {
-    return new Promise((resolve, reject) => {
-        const query = `SELECT * FROM users WHERE user_id = ?`;
-        db.get(query, [userId], (err, row) => {
-            if (err) {
-                logger.error(`❗ 사용자 정보 조회 실패 (userId: ${userId}): ${err.message}`);
-                dbEvents.emit('error', err);
-                reject(err);
-            } else {
-                logger.info(`✅ 사용자 정보 조회 성공 (userId: ${userId})`);
-                dbEvents.emit('userInfoRetrieved', row);
-                resolve(row || null);
             }
         });
     });
